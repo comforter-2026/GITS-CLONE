@@ -61,7 +61,7 @@ pipeline {
         always {
             junit 'test-result/junit.xml'
         }
-        sucess {
+        success {
             echo 'pipeline compleed - app deployed to Render!'
         }
         failure {

@@ -57,10 +57,10 @@ pipeline {
                 '''
                  
             }
-        }
+        }}
         }
 
-    post {
+    posts {
         always {
             junit 'test-result/junit.xml'
         }

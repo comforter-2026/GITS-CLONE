@@ -1,5 +1,5 @@
 pipeline {
-    agent any 
+    agent any
 
     stages {
 
@@ -10,65 +10,76 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
                 ls -la
                 node --version
                 npm --version
-                npm ci --cache /tmp/ .npm-cache
+                npm ci --cache /tmp/.npm-cache
                 npm run build
                 ls -la
                 '''
             }
         }
-       
-         stage('Test') {
+
+        stage('Test') {
             agent {
-                docker { 
+                docker {
                     image 'node:18-alpine'
                     reuseNode true
                 }
-         }
-             steps {
-                 sh '''
-                 test -f build/index.html
-                 CI=true npm test
-                '''     
+            }
+
+            steps {
+                sh '''
+                test -f build/index.html
+                CI=true npm test -- --watchAll=false
+                '''
             }
         }
 
-
         stage('Deploy to Render') {
-            agent { 
+
+            agent {
                 docker {
                     image 'node:18'
                     reuseNode true
-
                 }
-        }
+            }
+
             steps {
-                withCredentials([string(credentialsId: 'RENDER_API_KEY', variable: 'RENDER_API_KEY')]) {
+
+                withCredentials([
+                    string(credentialsId: 'RENDER_API_KEY', variable: 'RENDER_API_KEY'),
+                    string(credentialsId: 'render-service-id', variable: 'SERVICE_ID')
+                ]) {
+
                     sh '''
-                    SERVICE_ID=$(echo $RENDER_API_KEY | cut -d':' -f1)
-                    curl -X POST https://api.render.com/v1/services/${SERVICE_ID}/deploys \
+                    echo "Deploying service: $SERVICE_ID"
+
+                    curl -X POST "https://api.render.com/v1/services/$SERVICE_ID/deploys" \
                     -H "Authorization: Bearer $RENDER_API_KEY" \
                     -H "Content-Type: application/json" \
                     -d '{"clearCache":"clear"}'
-                '''
-                 
+                    '''
+                }
             }
-        }}
+        }
+    }
+
+    post {
+
+        always {
+            echo 'Pipeline completed'
         }
 
-    post{
-        always {
-            junit 'test-result/junit.xml'
-        }
         success {
-            echo 'pipeline compleed - app deployed to Render!'
+            echo 'Pipeline completed - app deployed to Render!'
         }
+
         failure {
-            echo 'pipeline failed - deployment skipped'
+            echo 'Pipeline failed - deployment skipped'
         }
-}
+    }
 }

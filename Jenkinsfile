@@ -31,8 +31,8 @@ pipeline {
          }
              steps {
                  sh '''
-                     test -f build/index.html
-                     CI=true npm test
+                 test -f build/index.html
+                 CI=true npm test
                 '''     
             }
         }
@@ -48,19 +48,19 @@ pipeline {
         }
             steps {
                 withCredentials([string(credentialsId: 'render-api-key', variable: 'RENDER_API_KEY')]) {
-                sh '''
-                   SERVICE_ID=$(echo $RENDER_API_KEY | cut -d':' -f1)
+                    sh '''
+                    SERVICE_ID=$(echo $RENDER_API_KEY | cut -d':' -f1)
                     curl -X POST https://api.render.com/v1/services/${SERVICE_ID}/deploys \
-                          -H "Authorization: Bearer $RENDER_API_KEY" \
-                          -H "Content-Type: application/json" \
-                          -d '{"clearCache":"clear"}'
+                    -H "Authorization: Bearer $RENDER_API_KEY" \
+                    -H "Content-Type: application/json" \
+                    -d '{"clearCache":"clear"}'
                 '''
                  
             }
         }}
         }
 
-    posts {
+    post{
         always {
             junit 'test-result/junit.xml'
         }

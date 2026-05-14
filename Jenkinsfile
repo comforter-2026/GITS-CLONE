@@ -1,43 +1,71 @@
 pipeline {
-    agent any
+    agent any 
 
     stages {
 
-        stage('Clone Check') {
-            steps {
-                echo 'Repository cloned successfully!'
-            }
-        }
-
         stage('Build') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
             steps {
-                echo 'Building application...'
-                sh 'ls -la'
+                sh '''
+                ls -la
+                node --version
+                npm --version
+                npm ci --cache /tmp/ .npm-cache
+                npm run build
+                ls -la
+                '''
+            }
+        }
+       
+         stage('Test') {
+            agent (
+                docker (
+                    image 'node:18-alpine'
+                    reuseNode true
+                )
+            )
+             steps {
+                 sh '''
+                     test -f build/index.html
+                     CI=npm test
+                '''     
             }
         }
 
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-                sh 'echo Tests passed!'
-            }
-        }
 
-        stage('Deploy') {
+        stage('Deploy to Render') {
+
+        }
+            agent (
+                docker (
+                    image 'node:18'
+                    reuseNode true
+
+                )
+            )
             steps {
-                echo 'Deploying application...'
-                sh 'echo Deployment completed!'
+                
+                sh '''
+                   curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
+                   Render --version
+                '''
+                 
             }
         }
     }
-
     post {
-        success {
-            echo 'Pipeline executed successfully!'
+        always {
+            junit 'test-result/junit.xml'
         }
-
+        sucess {
+            echo 'pipeline compleed - app deployed to Render!'
+        }
         failure {
-            echo 'Pipeline failed!'
+            echo 'pipeline failed - deployment skipped'
         }
-    }
 }

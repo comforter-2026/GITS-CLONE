@@ -52,7 +52,7 @@ pipeline {
 
                 withCredentials([
                     string(credentialsId: 'RENDER_API_KEY', variable: 'RENDER_API_KEY'),
-                    string(credentialsId: 'render-service-id', variable: 'SERVICE_ID')
+                    string(credentialsId: 'SERVICE_ID', variable: 'SERVICE_ID')
                 ]) {
 
                     sh '''

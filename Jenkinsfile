@@ -32,7 +32,7 @@ pipeline {
              steps {
                  sh '''
                      test -f build/index.html
-                     CI=npm test
+                     CI=true npm test
                 '''     
             }
         }

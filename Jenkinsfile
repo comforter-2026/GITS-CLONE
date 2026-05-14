@@ -40,14 +40,14 @@ pipeline {
 
         stage('Deploy to Render') {
 
-        }
-            agent (
-                docker (
+       
+            agent { 
+                docker {
                     image 'node:18'
                     reuseNode true
 
-                )
-            )
+                }
+        }
             steps {
                 
                 sh '''
@@ -56,6 +56,7 @@ pipeline {
                 '''
                  
             }
+        }
         }
     }
     post {

@@ -47,7 +47,7 @@ pipeline {
                 }
         }
             steps {
-                withCredentials([string(credentialsId: 'render-api-key', variable: 'RENDER_API_KEY')]) {
+                withCredentials([string(credentialsId: 'RENDER_API_KEY', variable: 'RENDER_API_KEY')]) {
                     sh '''
                     SERVICE_ID=$(echo $RENDER_API_KEY | cut -d':' -f1)
                     curl -X POST https://api.render.com/v1/services/${SERVICE_ID}/deploys \

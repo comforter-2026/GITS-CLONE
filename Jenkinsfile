@@ -39,8 +39,6 @@ pipeline {
 
 
         stage('Deploy to Render') {
-
-       
             agent { 
                 docker {
                     image 'node:18'
@@ -58,7 +56,7 @@ pipeline {
             }
         }
         }
-    }
+
     post {
         always {
             junit 'test-result/junit.xml'
@@ -69,4 +67,5 @@ pipeline {
         failure {
             echo 'pipeline failed - deployment skipped'
         }
+}
 }

@@ -47,10 +47,13 @@ pipeline {
                 }
         }
             steps {
-                
+                withCredentials([string(credentialsId: 'render-api-key', variable: 'RENDER_API_KEY')]) {
                 sh '''
-                   curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
-                   Render --version
+                   SERVICE_ID=$(echo $RENDER_API_KEY | cut -d':' -f1)
+                    curl -X POST https://api.render.com/v1/services/${SERVICE_ID}/deploys \
+                          -H "Authorization: Bearer $RENDER_API_KEY" \
+                          -H "Content-Type: application/json" \
+                          -d '{"clearCache":"clear"}'
                 '''
                  
             }
